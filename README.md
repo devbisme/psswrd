@@ -28,7 +28,7 @@ Use `psswrd` as follows:
    1. `l` stands for a random lowercase letter from `a-z`.
    2. `u` stands for a random uppercase letter from `A-Z`.
    3. `m` stands for a random mixed-case letter from `A-Za-z`.
-   4. `n` stands for a random digit from `0-9`.
+   4. `d` stands for a random digit from `0-9`.
    5. `p` stands for a random punctuation character from `!@#$%&*+-=?;`.
    6. Any other character is copied directly into the password.
 

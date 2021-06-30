@@ -77,7 +77,7 @@ def make_password(ngram, template):
         elif c == 'm':
             pc = phrase.pop()
             pwd.append(choice([pc.lower(), pc.upper()]))
-        elif c == "n":
+        elif c == "d":
             pwd.append(choice("0123456789"))
         elif c == "p":
             pwd.append(choice(r"!@#$%&*+-=?;"))
@@ -88,7 +88,7 @@ def make_password(ngram, template):
 
 def generate_password(ngram):
 
-    template = "llllllllnnn"
+    template = "llllllllddd"
     password = make_password(ngram, template)
     pyperclip.copy(password)
 
