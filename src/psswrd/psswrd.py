@@ -34,7 +34,15 @@ def show_msg(msg):
 
 
 class Ngram:
+    """Generates N-gram statistics from a corpus of text."""
+
     def __init__(self, corpus, n):
+        """Generates N-gram statistics from a corpus of text.
+
+        Args:
+            corpus (string): Corpus of text from which N-gram probabilities are extracted.
+            n (integer): Length of N-grams.
+        """
         table = defaultdict(Counter)
         for i in range(0, len(corpus) - n):
             pre = corpus[i : i + n]
@@ -46,6 +54,14 @@ class Ngram:
         self.n = n
 
     def __getitem__(self, pre):
+        """Given a prefix string, return the next character as weighted by N-gram probabilities.
+
+        Args:
+            pre (string): Prefix string used for lookup into N-gram table.
+
+        Returns:
+            character: Character that follows the prefix with selection weighted by N-gram probabilities.
+        """
         table = self.table
         pre = pre[-self.n :]
         while pre:
@@ -58,46 +74,77 @@ class Ngram:
         return choices(list(ctr.keys()), weights=ctr.values())[0]
 
     def phrase(self, length):
+        """Return a phrase of a selected length with letter frequencies that mirror the corpus.
+
+        Args:
+            length (integer): Length of phrase to generate.
+
+        Returns:
+            string: Generated phrase.
+        """
         s = ""
         for _ in range(length):
             s += self[s]
         return s
 
 
-def make_password(ngram, template):
+def generate_password(ngram, template):
+    """Generate a password given an N-gram table and a template.
+
+    Args:
+        ngram (Ngram): N-gram table.
+        template (string): Password template.
+
+    Returns:
+        string: The generated password.
+    """
+
     pwd_len = len(template)
-    phrase = list(ngram.phrase(pwd_len))
-    phrase.reverse()
-    pwd = []
+    phrase = list(ngram.phrase(pwd_len))  # Random string with N-gram statistics.
+    phrase.reverse()  # So we can use pop() to extract letters in order.
+
+    pwd = []  # Empty password.
+
     for c in template:
         if c == "u":
+            # Add next letter from phrase and uppercase it.
             pwd.append(phrase.pop().upper())
         elif c == "l":
+            # Add next letter from phrase and lowercase it.
             pwd.append(phrase.pop())
-        elif c == 'm':
+        elif c == "m":
+            # Add next letter from phrase and randomly choose to upper or lowercase it.
             pc = phrase.pop()
             pwd.append(choice([pc.lower(), pc.upper()]))
         elif c == "d":
+            # Add a random digit.
             pwd.append(choice("0123456789"))
         elif c == "p":
+            # Add a random punctuation mark.
             pwd.append(choice(r"!@#$%&*+-=?;"))
         else:
+            # Add the character from the template.
             pwd.append(c)
+
+    # Join password characters into a string and return it.
     return "".join(pwd)
 
 
-def generate_password(ngram):
+def password_gui(ngram):
+    """Password GUI
 
+    Args:
+        ngram (Ngram): N-gram table.
+    """
+
+    # Default password template.
     template = "llllllllddd"
-    password = make_password(ngram, template)
-    pyperclip.copy(password)
 
+    # Create GUI window with the specified layout.
     layout = [
         [
             sg.Text("Password:", font=gui_font),
-            sg.InputText(
-                default_text=password, key="-PWD-", size=(38, 1), font=gui_font
-            ),
+            sg.InputText(key="-PWD-", size=(38, 1), font=gui_font),
         ],
         [
             sg.Submit("Again", font=gui_font),
@@ -107,18 +154,26 @@ def generate_password(ngram):
             sg.InputText(default_text=template, size=(20, 1), font=gui_font),
         ],
     ]
-    window = sg.Window("psswrd - Generate a Password", layout)
-    while True:
-        event, values = window.read()
-        password, template = values.values()
+    window = sg.Window("psswrd - Generate a Password", layout, finalize=True)
 
+    # Repetitively generate passwords until Done is clicked.
+    while True:
+
+        # Generate password, copy it to clipboard, and display it in GUI.
+        password = generate_password(ngram, template)
+        pyperclip.copy(password)
+        window["-PWD-"].update(password)
+
+        # Wait for user to click a button.
+        event, values = window.read()
+
+        # Exit if the Done button is clicked.
         if event in (sg.WIN_CLOSED, "Done"):
             window.close()
             sys.exit(0)
 
-        password = make_password(ngram, template)
-        pyperclip.copy(password)
-        window["-PWD-"].update(password)
+        # Get the template in case the user changed it.
+        _, template = values.values()
 
 
 def parse_args():
@@ -144,7 +199,7 @@ def main():
 
     ngram = Ngram(corpus, 3)
 
-    generate_password(ngram)
+    password_gui(ngram)
 
 
 if __name__ == "__main__":
