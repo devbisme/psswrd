@@ -9,7 +9,7 @@ from collections import defaultdict, Counter
 from random import choice, choices
 import pyperclip
 
-import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 
 from psswrd import __version__
 
@@ -186,7 +186,7 @@ def parse_args():
         "-v",
         "--version",
         action="version",
-        version="pwd {ver}".format(ver=__version__),
+        version=f"version {__version__}",
     )
 
     return parser.parse_args()
